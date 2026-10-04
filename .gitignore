@@ -1,0 +1,9 @@
+# Ignore metadata folder
+.metadata/
+
+# Ignore all Maven build output
+**/target/
+
+# Ignore Spring Boot configuration files
+**/src/main/resources/application.yml
+**/src/main/resources/application-dev.yml

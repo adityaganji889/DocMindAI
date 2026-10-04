@@ -1,0 +1,9 @@
+# application.yml
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: DocMindAIBackend
+server:
+  port: 8081
