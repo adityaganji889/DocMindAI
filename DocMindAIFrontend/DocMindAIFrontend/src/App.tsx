@@ -77,14 +77,14 @@ const App: React.FC = () => {
           <Route path="/register" element={<Register />} />
 
           {/* Protected Application Routes */}
-          {/* 
+          
           <Route element={<ProtectedRoute />}>
-          */}
+         
             <Route path="/" element={<Dashboard />} />
             <Route path="/*" element={<Navigate to="/" replace />} />
-          {/*
+          
           </Route>
-          */}
+         
         </Routes>
 
         {/* Theme-aware global toast */}
