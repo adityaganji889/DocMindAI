@@ -2,9 +2,12 @@ package com.docmindai.app.services;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 //import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
@@ -14,6 +17,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +43,234 @@ public class RagService {
 	private final ChatClient chatClient;
 	
 	private final AppProperties appProperties;
+	
+	//confidence score changes starts
+	/**
+     * Utility method to keep confidence between 0 and 1.
+     */
+    public double clamp(double value) {
+
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            return 0.0;
+        }
+
+        return Math.max(0.0, Math.min(1.0, value));
+    }
+	/**
+     * Calculate retrieval confidence from the similarity scores
+     * of the retrieved documents.
+     *
+     * Weight:
+     * - Best document     = 50%
+     * - Second document   = 30%
+     * - Remaining docs    = 20%
+     */
+    public double calculateRetrievalConfidence(List<Document> documents) {
+
+        if (documents == null || documents.isEmpty()) {
+            return 0.0;
+        }
+
+        List<Double> scores = documents.stream()
+                .map(this::getSimilarityScore)
+                .filter(Objects::nonNull)
+                .sorted(Comparator.reverseOrder())
+                .toList();
+
+        if (scores.isEmpty()) {
+            return 0.0;
+        }
+
+        double top1 = scores.get(0);
+
+        double top2 = scores.size() > 1
+                ? scores.get(1)
+                : top1;
+
+        double remainingAverage;
+
+        if (scores.size() > 2) {
+            remainingAverage = scores.subList(2, scores.size())
+                    .stream()
+                    .mapToDouble(Double::doubleValue)
+                    .average()
+                    .orElse(0.0);
+        } else {
+            remainingAverage = top1;
+        }
+
+        double confidence =
+                (0.50 * top1)
+                + (0.30 * top2)
+                + (0.20 * remainingAverage);
+
+        return clamp(confidence);
+    }
+
+    /**
+     * Extract similarity score from Spring AI Document metadata.
+     *
+     * Depending on your VectorStore implementation, the metadata
+     * key may be "score", "similarity", or something else.
+     */
+    public Double getSimilarityScore(Document document) {
+
+        if (document == null || document.getMetadata() == null) {
+            return null;
+        }
+
+        Map<String, Object> metadata = document.getMetadata();
+
+        Object score = metadata.get("score");
+
+        if (score instanceof Number number) {
+            return clamp(number.doubleValue());
+        }
+
+        Object similarity = metadata.get("similarity");
+
+        if (similarity instanceof Number number) {
+            return clamp(number.doubleValue());
+        }
+
+        return null;
+    }
+
+    /**
+     * Calculate source agreement.
+     *
+     * This checks how many retrieved chunks come from the
+     * most represented source.
+     */
+    public double calculateSourceAgreement(List<Document> documents) {
+
+        if (documents == null || documents.isEmpty()) {
+            return 0.0;
+        }
+
+        Map<String, Long> sourceCounts = documents.stream()
+                .map(this::getSource)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(
+                        Function.identity(),
+                        Collectors.counting()
+                ));
+
+        if (sourceCounts.isEmpty()) {
+            return 0.0;
+        }
+
+        long totalDocuments = documents.size();
+
+        long maxDocumentsFromOneSource =
+                sourceCounts.values()
+                        .stream()
+                        .mapToLong(Long::longValue)
+                        .max()
+                        .orElse(0);
+
+        return clamp(
+                (double) maxDocumentsFromOneSource
+                        / totalDocuments
+        );
+    }
+
+    /**
+     * Get source name from document metadata.
+     */
+    public String getSource(Document document) {
+
+        if (document == null || document.getMetadata() == null) {
+            return null;
+        }
+
+        Map<String, Object> metadata = document.getMetadata();
+
+        Object source = metadata.get("source");
+
+        if (source != null) {
+            return source.toString();
+        }
+
+        // Common alternative metadata keys
+        Object fileName = metadata.get("fileName");
+
+        if (fileName != null) {
+            return fileName.toString();
+        }
+
+        Object documentName = metadata.get("document");
+
+        if (documentName != null) {
+            return documentName.toString();
+        }
+
+        return null;
+    }
+
+    /**
+     * Calculate final confidence.
+     *
+     * Formula:
+     *
+     * 50% Retrieval Quality
+     * 30% Groundedness
+     * 20% Source Agreement
+     */
+    public double calculateFinalConfidence(
+            List<Document> documents,
+            double groundednessScore) {
+
+        double retrievalConfidence =
+                calculateRetrievalConfidence(documents);
+
+        double sourceAgreement =
+                calculateSourceAgreement(documents);
+
+        groundednessScore = clamp(groundednessScore);
+
+        double finalConfidence =
+                (0.50 * retrievalConfidence)
+                + (0.30 * groundednessScore)
+                + (0.20 * sourceAgreement);
+
+        return clamp(finalConfidence);
+    }
+    
+    /**
+     * Convert 0.0 - 1.0 confidence to percentage.
+     */
+    public int getConfidencePercentage(double confidence) {
+
+        confidence = clamp(confidence);
+
+        return (int) Math.round(confidence * 100);
+    }
+    
+    /**
+     * Complete calculation.
+     */
+    public double calculate(
+            List<Document> documents,
+            double groundednessScore) {
+
+        double retrievalConfidence =
+                calculateRetrievalConfidence(documents);
+
+        double sourceAgreement =
+                calculateSourceAgreement(documents);
+
+        double finalConfidence =
+                calculateFinalConfidence(
+                        documents,
+                        groundednessScore
+                );
+
+        return getConfidencePercentage(finalConfidence);
+    }
+
+    //confidence score changes ends
+
 	
 	private String buildContextString(List<Document> similarDocuments) {
 		if(similarDocuments == null || similarDocuments.isEmpty()) {
@@ -109,15 +341,23 @@ public class RagService {
 		
 		logger.info("Completed Q&A in {} ms with {} citations",responseTime, citations.size());
 		
+		//confidence score changes starts
+		double groundednessScore = 0.90;
+		
+		double confidenceScore = calculate(similarDocuments,groundednessScore);
+		//confidence score changes ends
+		
 		return ChatResponseDto.builder()
 				.answer(answer)
 				.conversationId(request.getConversationId() != null ? request.getConversationId() : UUID.randomUUID().toString())
 				.citations(citations)
 				.responseTimeMs(responseTime)
+				.confidenceScore(confidenceScore) //confidence score changes
 				.build();
 		
 //		return null;
 	}
+	
 	
 	//this streams
 	public Flux<String> streamQuestionAnswer(ChatRequestDto request){
@@ -149,8 +389,12 @@ public class RagService {
 		}
 		
 		if(documentId!=null) {
+			logger.info("Filtering from document:"+documentId.toString());
 			FilterExpressionBuilder b = new FilterExpressionBuilder();
-			searchRequestBuilder.filterExpression(b.eq("documentId",documentId.toString()).build());
+			Filter.Expression documentId1 = b.eq("documentId",documentId.toString()).build();
+			searchRequestBuilder.filterExpression(documentId1);
+			
+		
 		}
 		
 		try {
@@ -227,10 +471,17 @@ public class RagService {
 		    citations.add(citation);
 		}
 		
+		//confidence score changes starts
+		double groundednessScore = 0.90;
+				
+		double confidenceScore = calculate(matchedDocs,groundednessScore);
+		//confidence score changes ends
+		
 		return SearchResultDto.builder()
 				.query(request.getQuery())
 				.totalMatches(citations.size())
 				.matches(citations)
+				.confidenceScore(confidenceScore) //confidence score changes
 				.build();
 //		return null;
 	}

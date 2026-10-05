@@ -17,9 +17,8 @@ public class SearchResultDto {
 
    private String query;
    private int  totalMatches;
-   
    private List<CitationDto> matches;
-   
+   private Double confidenceScore; //confidence score changes
 	
 	
 }

@@ -514,6 +514,36 @@ const Login: React.FC = () => {
                 RAG Q&A with Semantic Search & Vector Memory
               </span>
             </div>
+            <div className = "flex items-center justify-between">
+              <div className="flex justify-center">
+              <Link
+                to="/forgotPassword"
+                className="
+                    text-xs
+                    font-medium
+                    text-red-500
+                    hover:text-red-400
+                    transition-colors
+                "
+              >
+                Forgot Password?
+              </Link>
+            </div>
+            <div className="flex justify-center">
+              <Link
+                to="/resetPassword"
+                className="
+                    text-xs
+                    font-medium
+                    text-red-500
+                    hover:text-red-400
+                    transition-colors
+                "
+              >
+                Reset Password?
+              </Link>
+            </div>
+            </div>
           </div>
         </div>
       </motion.div>

@@ -20,7 +20,7 @@ public class CorsConfig implements WebMvcConfigurer{
 		String[] allowedHeaders = appProperties.getCors().getAllowedHeaders().split(",");
 		
 		registry.addMapping("/api/**")
-		        .allowedOrigins(allowedOrigins)
+		        .allowedOriginPatterns(allowedOrigins)
 		        .allowedMethods(allowedMethods)
 		        .allowedHeaders(allowedHeaders)
 		        .allowCredentials(true);

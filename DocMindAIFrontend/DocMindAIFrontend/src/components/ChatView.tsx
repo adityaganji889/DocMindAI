@@ -1070,7 +1070,25 @@ const MessageBubble: React.FC<{
                 {message.responseTimeMs}ms
               </span>
             )}
-
+          {/*confidence score changes ends*/}
+          {!isUser &&
+            message.confidenceScore !==
+              undefined &&
+            message.confidenceScore > 0 && (
+              <span
+                className="
+                  flex
+                  items-center
+                  gap-1
+                  text-xs
+                  text-[var(--text-muted)]
+                "
+              >
+                <Zap className="w-2.5 h-2.5 text-red-500" />
+                Confidence: {message.confidenceScore}%
+              </span>
+            )} 
+          {/*confidence score changes ends*/}
           {!isUser &&
             !message.isStreaming &&
             message.content && (
@@ -1581,6 +1599,8 @@ const ChatView: React.FC = () => {
               citations:
                 simRes.data.matches,
               responseTimeMs,
+              confidenceScore:
+                simRes.data.confidenceScore, //confidence score changes
               isStreaming: false,
             }
           );
@@ -1590,6 +1610,8 @@ const ChatView: React.FC = () => {
             assistantMsgId,
             {
               responseTimeMs,
+              confidenceScore:
+                simRes.data.confidenceScore, //confidence score changes
               isStreaming: false,
             }
           );
@@ -1663,6 +1685,8 @@ const ChatView: React.FC = () => {
             res.data.citations,
           responseTimeMs:
             res.data.responseTimeMs,
+          confidenceScore: 
+            res.data.confidenceScore, //confidence score changes
           createdAt:
             new Date().toISOString(),
         });

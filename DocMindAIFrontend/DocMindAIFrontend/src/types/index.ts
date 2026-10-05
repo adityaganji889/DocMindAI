@@ -77,6 +77,7 @@ export interface ChatResponseDto {
   conversationId: string;
   citations: CitationDto[];
   responseTimeMs: number;
+  confidenceScore: number; //confidence score changes
 }
 
 export interface SearchRequestDto {
@@ -107,6 +108,7 @@ export interface ConversationMessage {
   createdAt: string;
   citations?: CitationDto[];
   responseTimeMs?: number;
+  confidenceScore?: number; //confidence score changes
   isStreaming?: boolean;
 }
 

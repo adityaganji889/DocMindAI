@@ -17,6 +17,8 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 const Dashboard: React.FC = () => {
   const { activeTab, fetchDocuments } = useDocumentStore();
@@ -75,7 +77,8 @@ const App: React.FC = () => {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
+          <Route path="/forgotPassword" element={<ForgotPassword />} />
+          <Route path="/resetPassword" element={<ResetPassword />} />
           {/* Protected Application Routes */}
           
           <Route element={<ProtectedRoute />}>

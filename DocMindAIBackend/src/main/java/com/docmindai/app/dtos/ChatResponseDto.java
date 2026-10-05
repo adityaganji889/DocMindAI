@@ -19,5 +19,6 @@ public class ChatResponseDto {
 	private String conversationId;
 	private List<CitationDto> citations;
 	private Long responseTimeMs;
+	private Double confidenceScore; //confidence score changes
 
 }
