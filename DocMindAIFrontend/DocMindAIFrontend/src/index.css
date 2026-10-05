@@ -1,0 +1,576 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #c7211b;
+  --color-primary-dark: #8f1814;
+  --color-primary-light: #e0524d;
+  --color-accent: #06b6d4;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+}
+
+/* =========================================================
+   THEME SYSTEM
+   ========================================================= */
+
+:root,
+html.dark {
+  color-scheme: dark;
+
+  --bg-primary: #0b0f14;
+  --bg-secondary: #11161d;
+  --bg-tertiary: #161d26;
+  --bg-card: #151c25;
+  --bg-input: #0b0f14;
+  --bg-hover: #1b2430;
+
+  --border-primary: #27313d;
+  --border-secondary: #334155;
+  --border-hover: #475569;
+
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted: #64748b;
+
+  --primary: #c7211b;
+  --primary-hover: #ef4444;
+  --primary-soft: rgba(199, 33, 27, 0.12);
+  --primary-border: rgba(199, 33, 27, 0.35);
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+
+  --code-bg: #090d16;
+  --code-header: #141d2e;
+
+  --scrollbar: #334155;
+  --scrollbar-hover: #475569;
+
+  --glass-bg: rgba(30, 41, 59, 0.55);
+  --glass-border: rgba(51, 65, 85, 0.5);
+}
+
+html.light {
+  color-scheme: light;
+
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-input: #f8fafc;
+  --bg-hover: #f1f5f9;
+
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --border-hover: #94a3b8;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-tertiary: #64748b;
+  --text-muted: #94a3b8;
+
+  --primary: #c7211b;
+  --primary-hover: #a91c17;
+  --primary-soft: rgba(199, 33, 27, 0.08);
+  --primary-border: rgba(199, 33, 27, 0.25);
+
+  --success: #16a34a;
+  --warning: #d97706;
+  --error: #dc2626;
+
+  --code-bg: #f8fafc;
+  --code-header: #f1f5f9;
+
+  --scrollbar: #cbd5e1;
+  --scrollbar-hover: #94a3b8;
+
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(203, 213, 225, 0.8);
+}
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html,
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+body {
+  margin: 0;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================================
+   SCROLLBARS
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* =========================================================
+   THEME UTILITY CLASSES
+   ========================================================= */
+
+.theme-bg {
+  background-color: var(--bg-primary);
+}
+
+.theme-surface {
+  background-color: var(--bg-secondary);
+}
+
+.theme-card {
+  background-color: var(--bg-card);
+}
+
+.theme-input {
+  background-color: var(--bg-input);
+}
+
+.theme-border {
+  border-color: var(--border-primary);
+}
+
+.theme-text {
+  color: var(--text-primary);
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary);
+}
+
+.theme-text-muted {
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.25s ease-out forwards;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 0.25s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+
+/* =========================================================
+   TYPING
+   ========================================================= */
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   STREAMING CURSOR
+   ========================================================= */
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--primary);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  animation: blink 0.9s step-end infinite;
+}
+
+/* =========================================================
+   SHIMMER
+   ========================================================= */
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--border-secondary) 50%,
+    var(--bg-tertiary) 75%
+  );
+
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* =========================================================
+   GLASS
+   ========================================================= */
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+}
+
+/* =========================================================
+   PROSE / MARKDOWN
+   ========================================================= */
+
+.prose {
+  max-width: none;
+}
+
+.prose p {
+  margin-bottom: 0.6rem;
+  line-height: 1.65;
+}
+
+.prose h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0.75rem 0 0.35rem;
+}
+
+.prose h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0.65rem 0 0.3rem;
+}
+
+.prose h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0.55rem 0 0.25rem;
+}
+
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.35rem;
+  margin-bottom: 0.6rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.35rem;
+  margin-bottom: 0.6rem;
+}
+
+.prose li {
+  margin-bottom: 0.2rem;
+}
+
+.prose strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.prose em {
+  color: var(--text-secondary);
+}
+
+.prose code {
+  background: var(--code-bg);
+  color: #a78bfa;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.3rem;
+  font-size: 0.83em;
+  font-family:
+    'JetBrains Mono',
+    'Fira Code',
+    'Cascadia Code',
+    monospace;
+  border: 1px solid var(--border-primary);
+}
+
+.prose pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border-secondary);
+  border-radius: 0.6rem;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  margin: 0.65rem 0;
+}
+
+.prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-secondary);
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 0.8rem;
+  color: var(--text-tertiary);
+  margin: 0.6rem 0;
+  font-style: italic;
+}
+
+.prose hr {
+  border-color: var(--border-secondary);
+  margin: 0.75rem 0;
+}
+
+.prose a {
+  color: #6366f1;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* =========================================================
+   RANGE
+   ========================================================= */
+
+input[type='range'] {
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--border-secondary);
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-top: -5px;
+  box-shadow:
+    0 0 0 2px var(--bg-primary),
+    0 0 0 3px var(--primary);
+  transition: box-shadow 0.15s;
+}
+
+input[type='range']:hover::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 2px var(--bg-primary),
+    0 0 0 4px var(--primary);
+}
+
+/* =========================================================
+   PRISM
+   ========================================================= */
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #64748b;
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: #94a3b8;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #f43f5e;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #34d399;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #38bdf8;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #818cf8;
+  font-weight: 500;
+}
+
+.token.function,
+.token.class-name {
+  color: #f59e0b;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #fb923c;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
