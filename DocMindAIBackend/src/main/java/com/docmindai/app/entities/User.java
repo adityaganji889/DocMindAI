@@ -1,7 +1,11 @@
 package com.docmindai.app.entities;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import com.docmindai.app.enums.Role;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +41,9 @@ public class User {
 	private Role role;
 	@Column(unique=true,nullable=false)
 	private String email;
+	
+	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<DocumentMetaData> documentMetaDataSet = new LinkedHashSet<>();
 	
 	
 }

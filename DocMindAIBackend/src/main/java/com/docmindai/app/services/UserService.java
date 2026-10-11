@@ -57,7 +57,10 @@ public class UserService {
 		    		                     );
 		    return response; 		
 		}
-		return null;
+		else {
+			throw new RuntimeException("User not found");
+		}
+//		return null;
 	}
 	
     public UserDto registerUser(RegisterRequest request) {

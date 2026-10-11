@@ -10,11 +10,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.docmindai.app.dtos.DocumentMetadataDto;
 import com.docmindai.app.dtos.DocumentResponseDto;
 import com.docmindai.app.entities.DocumentMetaData;
+import com.docmindai.app.entities.User;
 import com.docmindai.app.enums.DocumentStatus;
 import com.docmindai.app.exceptions.DocumentProcessingException;
 import com.docmindai.app.exceptions.ResourceNotFoundException;
 import com.docmindai.app.repositories.DocumentMetaDataRepo;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -42,15 +44,17 @@ public class DocumentMetaDataService {
 	private final ModelMapper modelMapper;
 
 	// Method to upload and parse document
-	public DocumentResponseDto uploadAndProcess(MultipartFile file) {
+	@Transactional
+	public DocumentResponseDto uploadAndProcess(MultipartFile file, User user) {
 
 		String fileName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "document";
 		String contentType = file.getContentType() != null ? file.getContentType().toLowerCase()
 				: "application/octet-stream";
 
 		// Document meta data create
+		// Storing user details with document metadata
 		DocumentMetaData documentMetaData = DocumentMetaData.builder().filename(fileName).contentType(contentType)
-				.status(DocumentStatus.UPLOADING).fileSize(file.getSize()).createdAt(LocalDateTime.now()).build();
+				.status(DocumentStatus.UPLOADING).fileSize(file.getSize()).createdAt(LocalDateTime.now()).user(user).build();
 
 		// save the document meta data
 		documentMetaData = documentMetaDataRepo.save(documentMetaData);
@@ -64,7 +68,7 @@ public class DocumentMetaDataService {
 			parsedDocs = parserService.parse(file);
 
 			// ingest service
-			chunksCreated = ingestionService.ingest(documentMetaData, parsedDocs);
+			chunksCreated = ingestionService.ingest(documentMetaData, parsedDocs); //inserts data into vector store table
 			
 		}
 		catch(DocumentProcessingException e) {
@@ -80,17 +84,17 @@ public class DocumentMetaDataService {
 
 		return DocumentResponseDto.builder().id(documentMetaData.getId()).fileName(documentMetaData.getFilename())
 				.fileSize(documentMetaData.getFileSize()).chunksCreated(chunksCreated)
-				.status(documentMetaData.getStatus()).message("Document successfully processed and indexed.").build();
+				.status(documentMetaData.getStatus()).message("Document successfully processed and indexed.").userId(user.getId()).build();
 	}
 
 	// Method to upload and parse multiple documents
-	public List<DocumentResponseDto> uploadMultipleDocuments(List<MultipartFile> files) {
+	public List<DocumentResponseDto> uploadMultipleDocuments(List<MultipartFile> files, User user) {
 
 		List<DocumentResponseDto> documents = new ArrayList<DocumentResponseDto>();
 
 		for (MultipartFile file : files) {
 
-			DocumentResponseDto document = uploadAndProcess(file);
+			DocumentResponseDto document = uploadAndProcess(file,user);
 
 			documents.add(document);
 
@@ -98,6 +102,24 @@ public class DocumentMetaDataService {
 
 		return documents;
 
+	}
+	
+	// Method to fetch all uploaded documents of logged in user
+	public List<DocumentMetadataDto> getAllDocumentsOfUser(User user) {
+
+		List<DocumentMetadataDto> documents = new ArrayList<DocumentMetadataDto>();
+
+		List<DocumentMetaData> fetchedDocuments = documentMetaDataRepo.findByUserOrderByCreatedAtDesc(user);
+
+		for (DocumentMetaData fetchedDocument : fetchedDocuments) {
+
+			DocumentMetadataDto document = modelMapper.map(fetchedDocument, DocumentMetadataDto.class);
+
+			documents.add(document);
+
+		}
+
+		return documents;
 	}
 
 	// Method to fetch all uploaded documents
@@ -127,6 +149,7 @@ public class DocumentMetaDataService {
 	}
 
 	// Method to delete a particular uploaded document
+	@Transactional
 	public void deleteDocumentById(UUID id) {
         
 		DocumentMetaData documentMetaData = documentMetaDataRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Document with given id:"+ id.toString() +" not found"));

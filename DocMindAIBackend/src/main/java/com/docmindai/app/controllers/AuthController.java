@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 	
@@ -32,7 +32,7 @@ public class AuthController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 	
-	@PostMapping("/login")
+	@PostMapping("/register")
 	public ResponseEntity<UserDto> register(@RequestBody RegisterRequest request){
 		//Todo
 		//Register the new user and return user

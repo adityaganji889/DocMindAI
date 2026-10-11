@@ -1,13 +1,18 @@
 package com.docmindai.app.config;
 
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
 public class DocMindAIConfig {
@@ -24,7 +29,27 @@ public class DocMindAIConfig {
 						 .email("adityaganji889@gmail.com")
 						 .url("https://peerlist.io/adityaganji889")
 						)
+				)
+				.servers(
+				 List.of(
+					new Server().description("Local Env").url("http://localhost:8081") // similar add another entry of Server for Prod Env
+				  )
+				)
+				.security(
+				 List.of(
+					new SecurityRequirement().addList("BearerAuth") //Enabling Security Requirement Globally
+				 )		
 				);
+	}
+	
+	@Bean
+	public SecurityScheme securityScheme() {
+		return new SecurityScheme().name("BearerAuth")
+				   .description("JWT Auth Description")
+				   .scheme("bearer")
+				   .type(SecurityScheme.Type.HTTP)
+				   .bearerFormat("JWT")
+				   .in(SecurityScheme.In.HEADER); //injects JWT Token in the header
 	}
 	
 	@Bean
