@@ -22,6 +22,9 @@ import com.docmindai.app.dtos.ChatRequestDto;
 import com.docmindai.app.dtos.ChatResponseDto;
 import com.docmindai.app.dtos.SearchRequestDto;
 import com.docmindai.app.dtos.SearchResultDto;
+import com.docmindai.app.entities.User;
+
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/v1/chat")
@@ -40,9 +43,11 @@ public class ChatController {
 			   description = "This api is used to ask a question against all documents or a specific document with citations."
 	)
 	public ResponseEntity<ApiResponse<ChatResponseDto>> askQuestion(
-			 @Valid @RequestBody ChatRequestDto request
+			 @Valid @RequestBody ChatRequestDto request,
+			 Authentication authentication
 			){
-		ChatResponseDto chatResponse = ragService.askQuestion(request);
+		User user  = (User) authentication.getPrincipal();
+		ChatResponseDto chatResponse = ragService.askQuestion(request,user);
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ApiResponse.<ChatResponseDto>builder()
 				.success(true)
@@ -61,9 +66,11 @@ public class ChatController {
 			   description = "This api is used to stream real-time Q&A answer tokens via Server-Sent Events (SSE)."
 	)
 	public Flux<String> streamQuestion(
-			 @Valid @RequestBody ChatRequestDto request
+			 @Valid @RequestBody ChatRequestDto request,
+			 Authentication authentication
 			){
-		Flux<String> chatResponse = ragService.streamQuestionAnswer(request);
+		User user  = (User) authentication.getPrincipal();
+		Flux<String> chatResponse = ragService.streamQuestionAnswer(request,user);
 		return chatResponse;
 		
 //		return ResponseEntity.ok("This is just testing configurations");
@@ -76,9 +83,11 @@ public class ChatController {
 			   description = "This api is used to perform semantic similarity search on stored document vectors."
 	)
 	public ResponseEntity<ApiResponse<SearchResultDto>> searchSimilar(
-			 @Valid @RequestBody SearchRequestDto request
+			 @Valid @RequestBody SearchRequestDto request,
+			 Authentication authentication
 			){
-		SearchResultDto chatResponse = ragService.searchSimilarChunks(request);
+		User user  = (User) authentication.getPrincipal();
+		SearchResultDto chatResponse = ragService.searchSimilarChunks(request,user);
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ApiResponse.<SearchResultDto>builder()
 				.success(true)

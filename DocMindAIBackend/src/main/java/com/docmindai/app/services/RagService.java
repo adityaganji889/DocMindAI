@@ -27,6 +27,7 @@ import com.docmindai.app.dtos.ChatResponseDto;
 import com.docmindai.app.dtos.CitationDto;
 import com.docmindai.app.dtos.SearchRequestDto;
 import com.docmindai.app.dtos.SearchResultDto;
+import com.docmindai.app.entities.User;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -314,12 +315,12 @@ public class RagService {
 	}
 	
 	//to ask any thing related to document
-	public ChatResponseDto askQuestion(ChatRequestDto request) {
+	public ChatResponseDto askQuestion(ChatRequestDto request, User user) {
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Processing query : '{}', scoped documentId: {}", request.getQuestion(), request.getDocumentId());
 		
-		List<Document> similarDocuments = retrieveRelevantDocuments(request.getQuestion(),request.getDocumentId(),request.getTopK(),request.getMinSimilarity());
+		List<Document> similarDocuments = retrieveRelevantDocuments(request.getQuestion(),request.getDocumentId(),request.getTopK(),request.getMinSimilarity(),user);
 		
 		List<CitationDto> citations = new ArrayList<>();
 
@@ -360,11 +361,11 @@ public class RagService {
 	
 	
 	//this streams
-	public Flux<String> streamQuestionAnswer(ChatRequestDto request){
+	public Flux<String> streamQuestionAnswer(ChatRequestDto request, User user){
 		
 		logger.info("Streaming query: '{}'", request.getQuestion());
 		
-		List<Document> relevantDocuments = retrieveRelevantDocuments(request.getQuestion(),request.getDocumentId(),request.getTopK(),request.getMinSimilarity());
+		List<Document> relevantDocuments = retrieveRelevantDocuments(request.getQuestion(),request.getDocumentId(),request.getTopK(),request.getMinSimilarity(),user);
 		
         String contextText = buildContextString(relevantDocuments);
 		
@@ -376,7 +377,8 @@ public class RagService {
 		          .content();
 	}
 	
-	private List<Document> retrieveRelevantDocuments(@NotBlank(message = "Query cannot be empty") String query, UUID documentId, Integer topK, Double similaritySearch) {
+	// this is very important document that fetches the similar result from vector db
+	private List<Document> retrieveRelevantDocuments(@NotBlank(message = "Query cannot be empty") String query, UUID documentId, Integer topK, Double similaritySearch, User user) {
 		int effectiveTopK = (topK != null && topK > 0) ? topK : appProperties.getRag().getTopK();
 		double effectiveSimilarity = (similaritySearch != null) ? similaritySearch : appProperties.getRag().getSimilarityThreshold();
 		
@@ -388,14 +390,22 @@ public class RagService {
 			searchRequestBuilder.similarityThreshold(effectiveSimilarity);
 		}
 		
+		FilterExpressionBuilder b = new FilterExpressionBuilder();
+		Filter.Expression filterExpression = null;
 		if(documentId!=null) {
 			logger.info("Filtering from document:"+documentId.toString());
-			FilterExpressionBuilder b = new FilterExpressionBuilder();
-			Filter.Expression documentId1 = b.eq("documentId",documentId.toString()).build();
-			searchRequestBuilder.filterExpression(documentId1);
-			
-		
+			//Introduced userId filter
+			filterExpression = b.and(
+					  b.eq("userId",user.getId().toString()),
+					  b.eq("documentId",documentId.toString())
+					).build();
 		}
+		else {
+			//Introduced userId filter
+			logger.info("Filtering from documents from user:"+user.getId().toString());
+			filterExpression = b.eq("userId",user.getId().toString()).build();
+		}
+		searchRequestBuilder.filterExpression(filterExpression);
 		
 		try {
 			List<Document> documents = vectorStore.similaritySearch(searchRequestBuilder.build());
@@ -460,9 +470,9 @@ public class RagService {
 //		return null;
 	}
 	
-	public SearchResultDto searchSimilarChunks(SearchRequestDto request) {
+	public SearchResultDto searchSimilarChunks(SearchRequestDto request, User user) {
 		
-		List<Document> matchedDocs = retrieveRelevantDocuments(request.getQuery(),request.getDocumentId(),request.getTopK(),request.getSimilaritySearch());
+		List<Document> matchedDocs = retrieveRelevantDocuments(request.getQuery(),request.getDocumentId(),request.getTopK(),request.getSimilaritySearch(),user);
 		
 		List<CitationDto> citations = new ArrayList<>();
 

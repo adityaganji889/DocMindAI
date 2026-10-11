@@ -11,7 +11,7 @@ import com.docmindai.app.dtos.LoginResponse;
 import com.docmindai.app.dtos.RegisterRequest;
 import com.docmindai.app.dtos.UserDto;
 import com.docmindai.app.services.UserService;
-import com.openai.models.beta.realtime.ResponseCreateEvent.Response;
+
 
 import lombok.RequiredArgsConstructor;
 
