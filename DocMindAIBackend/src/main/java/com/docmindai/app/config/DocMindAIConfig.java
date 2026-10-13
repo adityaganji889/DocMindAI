@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -53,7 +55,7 @@ public class DocMindAIConfig {
 	}
 	
 	@Bean
-	public ChatClient chatClient(ChatClient.Builder builder) {
+	public ChatClient chatClient(ChatClient.Builder builder, ChatMemory memory) {
 		return builder
 			   .defaultSystem("""
 			   		                  You are DocMind, an intelligent, versatile, and friendly AI doucment intelligence assistant.
@@ -63,6 +65,7 @@ public class DocMindAIConfig {
 			   		                  3. Hybrid Synthesis: If the document context partially covers a topic, synthesize the document facts with your broaded knowledge to give a complete, high-quality answer.
 			   		                  4. Tone & Format: Always be warm, professional, clear, and structured. Use Markdown (headings, bullet points, bold text, code blocks) to make responses easy to read.
 			   		""")
+			   .defaultAdvisors(MessageChatMemoryAdvisor.builder(memory).build())
 			   .build();
 	}
 	

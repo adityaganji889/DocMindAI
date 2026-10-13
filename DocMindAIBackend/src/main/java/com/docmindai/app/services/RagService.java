@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -335,6 +336,7 @@ public class RagService {
 		
 		String answer = chatClient.prompt()
 		          .user(prompt)
+		          .advisors(a -> a.param(ChatMemory.CONVERSATION_ID,request.getConversationId()))
 		          .call()
 		          .content();
 		
@@ -373,6 +375,7 @@ public class RagService {
 		
 		return chatClient.prompt()
 		          .user(userPrompt)
+		          .advisors(a -> a.param(ChatMemory.CONVERSATION_ID,request.getConversationId()))
 		          .stream()
 		          .content();
 	}
