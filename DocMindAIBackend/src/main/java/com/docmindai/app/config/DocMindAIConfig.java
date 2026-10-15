@@ -15,8 +15,10 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
+@Slf4j
 public class DocMindAIConfig {
 
 	@Bean  //Method to customize Open API documentation UI part
@@ -56,6 +58,7 @@ public class DocMindAIConfig {
 	
 	@Bean
 	public ChatClient chatClient(ChatClient.Builder builder, ChatMemory memory) {
+		log.info("Chat Memory class name {} ", memory.getClass().getName());
 		return builder
 			   .defaultSystem("""
 			   		                  You are DocMind, an intelligent, versatile, and friendly AI doucment intelligence assistant.

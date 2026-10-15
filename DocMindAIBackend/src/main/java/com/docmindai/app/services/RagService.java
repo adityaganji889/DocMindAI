@@ -319,6 +319,9 @@ public class RagService {
 	public ChatResponseDto askQuestion(ChatRequestDto request, User user) {
 		
 		long startTime = System.currentTimeMillis();
+		
+		String conversationId = request.getConversationId() != null ? request.getConversationId() : UUID.randomUUID().toString();
+		
 		logger.info("Processing query : '{}', scoped documentId: {}", request.getQuestion(), request.getDocumentId());
 		
 		List<Document> similarDocuments = retrieveRelevantDocuments(request.getQuestion(),request.getDocumentId(),request.getTopK(),request.getMinSimilarity(),user);

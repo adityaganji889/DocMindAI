@@ -26,6 +26,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class Conversation {
 
 	@Id
