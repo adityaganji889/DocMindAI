@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.docmindai.app.services.RagService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/v1/chat")
+@SecurityRequirement(name = "BearerAuth") // Should match the SecurityScheme name
 @Tag(
   name = "Chat Management",
   description = "Endpoints for chat related apis."
