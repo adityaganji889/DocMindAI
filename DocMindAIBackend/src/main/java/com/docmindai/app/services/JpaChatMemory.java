@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+import java.util.Comparator;
 
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -84,11 +85,12 @@ public class JpaChatMemory implements ChatMemory {
 	@Transactional(readOnly = true)
 	public List<Message> get(String conversationId) {
 		// TODO Auto-generated method stub
-		List<ChatMessage> all = chatMessageRepository.findAll();
+		List<ChatMessage> all = chatMessageRepository.findLastNMessages(conversationId,10);
 		if(all == null || all.isEmpty()) {
 			return Collections.emptyList();
 		}
-		Collections.reverse(all);
+//		Collections.reverse(all);
+		all.sort(Comparator.comparing(ChatMessage::getCreatedAt).reversed());
 		List<Message> springAIMessages = new ArrayList<Message>();
 		for(ChatMessage chatMessage : all) {
 			switch(chatMessage.getMessageType()) {

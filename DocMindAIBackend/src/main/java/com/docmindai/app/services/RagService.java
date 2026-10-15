@@ -1,5 +1,6 @@
 package com.docmindai.app.services;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +30,9 @@ import com.docmindai.app.dtos.CitationDto;
 import com.docmindai.app.dtos.SearchRequestDto;
 import com.docmindai.app.dtos.SearchResultDto;
 import com.docmindai.app.entities.User;
+import com.docmindai.app.repositories.ConversationRepository;
+
+import com.docmindai.app.entities.Conversation;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +49,8 @@ public class RagService {
 	private final ChatClient chatClient;
 	
 	private final AppProperties appProperties;
+	
+	private final ConversationRepository conversationRepository;
 	
 	//confidence score changes starts
 	/**
@@ -288,7 +294,7 @@ public class RagService {
 //		return null;
 	}
 	
-	private String buildPrompt(@NotBlank(message = "Query cannot be empty") String question, String contextText) {
+	/* private String buildPrompt(@NotBlank(message = "Query cannot be empty") String question, String contextText) {
 		if(contextText!=null && !contextText.isBlank()) {
 			return String.format("""
 					 Document Context:
@@ -313,7 +319,24 @@ public class RagService {
 					""",question);
 		}
 //		return null;
-	}
+	} */
+	
+    private void ensureConversationExists(String conversationId, User user, String question) {
+    	
+    	Conversation conversation = conversationRepository.findById(conversationId)
+    			                                          .orElseGet(()->{
+    			                                        	  String title = question.length() > 10 ? question.substring(0,47) + "....." : question;
+    			                                        	  return conversationRepository.save(
+    			                                        			  Conversation.builder()
+		                                        			             .id(conversationId)
+		                                        			             .title(title)
+		                                        			             .user(user)
+		                                        			             .createdAt(LocalDateTime.now())
+		                                        			             .updatedAt(LocalDateTime.now())
+		                                        			             .build()
+    			                                        			  );
+    			                                          });
+    }
 	
 	//to ask any thing related to document
 	public ChatResponseDto askQuestion(ChatRequestDto request, User user) {
@@ -321,6 +344,8 @@ public class RagService {
 		long startTime = System.currentTimeMillis();
 		
 		String conversationId = request.getConversationId() != null ? request.getConversationId() : UUID.randomUUID().toString();
+		
+        ensureConversationExists(conversationId,user,request.getQuestion());		
 		
 		logger.info("Processing query : '{}', scoped documentId: {}", request.getQuestion(), request.getDocumentId());
 		
@@ -335,10 +360,11 @@ public class RagService {
 		
 		String contextText = buildContextString(similarDocuments);
 		
-		String prompt = buildPrompt(request.getQuestion(),contextText);
+//		String prompt = buildPrompt(request.getQuestion(),contextText);
 		
 		String answer = chatClient.prompt()
-		          .user(prompt)
+				  .system(system -> system.param("doc_context",contextText))
+		          .user(request.getQuestion())
 		          .advisors(a -> a.param(ChatMemory.CONVERSATION_ID,request.getConversationId()))
 		          .call()
 		          .content();
@@ -374,10 +400,11 @@ public class RagService {
 		
         String contextText = buildContextString(relevantDocuments);
 		
-		String userPrompt = buildPrompt(request.getQuestion(),contextText);
+//		String userPrompt = buildPrompt(request.getQuestion(),contextText);
 		
 		return chatClient.prompt()
-		          .user(userPrompt)
+				  .system(system -> system.param("doc_context",contextText))
+		          .user(request.getQuestion())
 		          .advisors(a -> a.param(ChatMemory.CONVERSATION_ID,request.getConversationId()))
 		          .stream()
 		          .content();
