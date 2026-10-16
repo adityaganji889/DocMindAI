@@ -20,15 +20,13 @@ import com.docmindai.app.entities.User;
 import com.docmindai.app.services.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -43,21 +41,9 @@ public class AuthController {
 
 	@Operation(
             summary = "Authenticate a user",
-            description = "This endpoint allows an existing user to log in to the system.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "User login credentials",
-                content = @Content(schema = @Schema(implementation = LoginRequest.class))
-            ),
-            responses = {
-                @ApiResponse(responseCode = "200", description = "User logged in successfully", 
-                             content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-                @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials", 
-                             content = @Content),
-                @ApiResponse(responseCode = "500", description = "Internal Server Error - Error occurred during login", 
-                content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            },
-            security = {}
-        )
+            description = "This endpoint allows an existing user to log in to the system."
+    )
+	@SecurityRequirements
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
 		//Todo
@@ -68,21 +54,9 @@ public class AuthController {
 	
 	@Operation(
             summary = "Register a new user",
-            description = "This endpoint allows a new user to register in the system.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "User registration details",
-                content = @Content(schema = @Schema(implementation = RegisterRequest.class))
-            ),
-            responses = {
-                @ApiResponse(responseCode = "200", description = "User registered successfully", 
-                             content = @Content(schema = @Schema(implementation = UserDto.class))),
-                @ApiResponse(responseCode = "400", description = "Invalid input data", 
-                             content = @Content),
-                @ApiResponse(responseCode = "500", description = "Internal Server Error - Error occurred during register", 
-                content = @Content(schema = @Schema(implementation = UserDto.class))),
-            },
-            security = {}
-        )
+            description = "This endpoint allows a new user to register in the system."
+    )
+	@SecurityRequirements
 	@PostMapping("/register")
 	public ResponseEntity<UserDto> register(@RequestBody RegisterRequest request){
 		//Todo
@@ -94,18 +68,9 @@ public class AuthController {
 	// send otp to registered user email id for resetting/changing their password
     @Operation(
             summary = "Otp Email Request",
-            description = "Sends an OTP to the provided email for resetting/changing password.",
-            parameters = @Parameter(name = "email", description = "Registered user email for resetting/changing password for Doc Mind AI app", required = true),
-            responses = {
-                @ApiResponse(responseCode = "200", description = "Email containing OTP sent successfully", 
-                             content = @Content(schema = @Schema(implementation = DefaultResponse.class))),
-                @ApiResponse(responseCode = "404", description = "User not found with the provided email", 
-                             content = @Content),
-                @ApiResponse(responseCode = "500", description = "Internal Server Error", 
-                             content = @Content)
-            },
-            security = {}
-        )
+            description = "Sends an OTP to the provided email for resetting/changing password."        
+    )
+    @SecurityRequirements
     @PostMapping("/forgotPassword/{email}")
     public ResponseEntity<DefaultResponse> verifyEmail(@PathVariable String email) {
         Optional<User> cfu = userService.findByUsername(email);
@@ -135,22 +100,9 @@ public class AuthController {
 	
 	@Operation(
             summary = "Reset Password",
-            description = "Resets the password for the user associated with the provided email.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "New password details",
-                content = @Content(schema = @Schema(implementation = ChangePassword.class))
-            ),
-            parameters = @Parameter(name = "email", description = "User email to reset the password", required = true),
-            responses = {
-                @ApiResponse(responseCode = "200", description = "Password changes successfully", 
-                             content = @Content(schema = @Schema(implementation = DefaultResponse.class))),
-                @ApiResponse(responseCode = "417", description = "Passwords do not match", 
-                             content = @Content),
-                @ApiResponse(responseCode = "500", description = "Internal Server Error", 
-                             content = @Content)
-            },
-            security = {}
+            description = "Resets the password for the user associated with the provided email."
         )
+	@SecurityRequirements
     @PostMapping("/resetPassword/{email}")
     public ResponseEntity<DefaultResponse> changePasswordHandler(@RequestBody ChangePassword changePassword,
                                                         @PathVariable String email) {

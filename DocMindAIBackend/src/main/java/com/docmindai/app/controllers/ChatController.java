@@ -29,7 +29,7 @@ import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/v1/chat")
-@SecurityRequirement(name = "BearerAuth") // Should match the SecurityScheme name
+//@SecurityRequirement(name = "BearerAuth") // Should match the SecurityScheme name
 @Tag(
   name = "Chat Management",
   description = "Endpoints for chat related apis."

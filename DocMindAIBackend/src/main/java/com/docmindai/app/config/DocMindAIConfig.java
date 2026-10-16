@@ -9,9 +9,11 @@ import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -22,40 +24,76 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DocMindAIConfig {
 
-	@Bean  //Method to customize Open API documentation UI part
-	public OpenAPI openAPI() {
-		return new OpenAPI().info(
-				new Info()
-				.title("DocMind - AI Document Intelligence & RAG APIs")
-				.description("REST API for DocMind: Multi-format document ingestion, vector embeddings with PostgreSQL pgvector, and hybrid conversational Q&A with OpenAI.")
-				.version("1.0.0")
-				.contact(new Contact()
-						 .name("Aditya Ganji")
-						 .email("adityaganji889@gmail.com")
-						 .url("https://peerlist.io/adityaganji889")
-						)
-				)
-				.servers(
-				 List.of(
-					new Server().description("Local Env").url("http://localhost:8081") // similar add another entry of Server for Prod Env
-				  )
-				)
-				.security(
-				 List.of(
-					new SecurityRequirement().addList("BearerAuth") //Enabling Security Requirement Globally
-				 )		
-				);
-	}
-	
+//	@Bean  //Method to customize Open API documentation UI part
+//	public OpenAPI openAPI() {
+//		return new OpenAPI().info(
+//				new Info()
+//				.title("DocMind - AI Document Intelligence & RAG APIs")
+//				.description("REST API for DocMind: Multi-format document ingestion, vector embeddings with PostgreSQL pgvector, and hybrid conversational Q&A with OpenAI.")
+//				.version("1.0.0")
+//				.contact(new Contact()
+//						 .name("Aditya Ganji")
+//						 .email("adityaganji889@gmail.com")
+//						 .url("https://peerlist.io/adityaganji889")
+//						)
+//				)
+//				.servers(
+//				 List.of(
+//					new Server().description("Local Env").url("http://localhost:8081") // similar add another entry of Server for Prod Env
+//				  )
+//				)
+//				.security(
+//				 List.of(
+//					new SecurityRequirement().addList("BearerAuth") //Enabling Security Requirement Globally
+//				 )		
+//				);
+//	}
+//	
+//	@Bean
+//	public SecurityScheme securityScheme() {
+//		return new SecurityScheme().name("BearerAuth")
+//				   .description("JWT Auth Description")
+//				   .scheme("bearer")
+//				   .type(SecurityScheme.Type.HTTP)
+//				   .bearerFormat("JWT")
+//				   .in(SecurityScheme.In.HEADER); //injects JWT Token in the header
+//	}
+
 	@Bean
-	public SecurityScheme securityScheme() {
-		return new SecurityScheme().name("BearerAuth")
-				   .description("JWT Auth Description")
-				   .scheme("bearer")
-				   .type(SecurityScheme.Type.HTTP)
-				   .bearerFormat("JWT")
-				   .in(SecurityScheme.In.HEADER); //injects JWT Token in the header
-	}
+    public OpenAPI openAPI() {
+
+        String securitySchemeName = "bearerAuth";
+
+        return new OpenAPI()
+                .info(
+                        new Info()
+                                .title("DocMind - AI Document Intelligence & RAG APIs")
+                                .description("REST API for DocMind: Multi-format document ingestion, vector embeddings with PostgreSQL pgvector, and hybrid conversational Q&A with OpenAI.")
+
+                                .version("1.0.0")
+                                .contact(new Contact()
+                                        .name("Aditya Ganji")
+                                        .email("adityaganji889@gmail.com")
+                                        .url("https://peerlist.io/adityaganji889")
+                                )
+
+                ).components(new Components()
+                        .addSecuritySchemes(
+                                securitySchemeName,
+                                new SecurityScheme()
+                                        .name(securitySchemeName)
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                        ))
+
+                .addSecurityItem(
+                        new SecurityRequirement()
+                                .addList(securitySchemeName)
+                );
+
+
+    }
 	
 	@Bean
 	public ChatClient chatClient(ChatClient.Builder builder, ChatMemory memory) {
@@ -81,4 +119,11 @@ public class DocMindAIConfig {
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
+	
+	@Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+	
+	
 }

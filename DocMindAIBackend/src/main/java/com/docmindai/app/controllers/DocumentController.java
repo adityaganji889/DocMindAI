@@ -34,7 +34,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/v1/documents")
-@SecurityRequirement(name = "BearerAuth")
+//@SecurityRequirement(name = "BearerAuth")
 @Tag(name = "Document Management", description = "Endpoints for uploading, listing and managing documents and their vector embeddings.")
 public class DocumentController {
 

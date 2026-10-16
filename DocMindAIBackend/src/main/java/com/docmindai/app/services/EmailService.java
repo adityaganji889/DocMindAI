@@ -23,7 +23,7 @@ public class EmailService {
     private final String emailApiUrl = "https://mail-sender-helper-api.vercel.app/api/users/generateOTPVerifyMail"; // Replace with actual API
 
     @Autowired
-    @Qualifier("ExternalRestTemplate")
+//    @Qualifier("ExternalRestTemplate")
     private RestTemplate restTemplate;
     
     public EmailService(JavaMailSender javaMailSender) {
