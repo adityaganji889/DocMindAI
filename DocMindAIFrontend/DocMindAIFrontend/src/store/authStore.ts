@@ -13,6 +13,15 @@ interface AuthState {
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<UserDto>;
   logout: () => void;
+  //Forgot, Reset Password Functionalities changes starts
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (
+    otp: Number,
+    email: string,
+    password: string,
+    repeatPassword: string
+  ) => Promise<void>;
+  //Forgot, Reset Password Functionalities changes ends
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -74,6 +83,40 @@ export const useAuthStore = create<AuthState>()(
 
         set({ user: null, token: null, isLoading: false });
       },
+      //Forgot, Reset Password Functionalities changes starts
+      forgotPassword: async (email: string) => {
+        set({ isLoading: true });
+
+        try {
+          await authApi.forgotPassword(email);
+          set({ isLoading: false });
+        } catch (error) {
+          set({ isLoading: false });
+          throw error;
+        }
+      },
+
+      resetPassword: async (
+        otp: Number,
+        email: string,
+        password: string,
+        repeatPassword: string
+      ) => {
+        set({ isLoading: true });
+
+        try {
+          await authApi.resetPassword(otp,email, {
+            password,
+            repeatPassword,
+          });
+
+          set({ isLoading: false });
+        } catch (error) {
+          set({ isLoading: false });
+          throw error;
+        }
+      },
+      //Forgot, Reset Password Functionalities changes ends
     }),
     {
       name: 'docmind-auth',

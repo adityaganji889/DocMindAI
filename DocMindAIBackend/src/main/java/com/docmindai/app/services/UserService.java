@@ -121,7 +121,20 @@ public class UserService {
 //		});
 	}
     
-    public Optional<Boolean> changePasswordHandle(String email, String newPassword, String repeatPassword) {
+    public void deleteOtpById(Integer id) {
+//		return CompletableFuture.runAsync(() -> {
+			Optional<Otp> otp = otpRepository.findById(id);
+			if (otp.isPresent()) {
+				otpRepository.deleteById(otp.get().getFpid());
+			}
+//		});
+	}
+    
+    public Optional<Otp> findByOtpAndUser(Integer otpValue, User user) {
+		return otpRepository.findByOtpAndUser(otpValue, user);
+	}
+    
+    public Optional<Boolean> changePasswordHandle(String email, Integer Otp, String newPassword, String repeatPassword) {
 //		return CompletableFuture.supplyAsync(() -> {
 			Boolean isPasswordMatched = false;
 			if (!newPassword.equals(repeatPassword)) {

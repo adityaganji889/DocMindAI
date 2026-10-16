@@ -15,6 +15,7 @@ import {
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
+import { useAuthStore } from '../store/authStore';
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -36,6 +37,8 @@ const ResetPassword: React.FC = () => {
     password: false,
     confirmPassword: false,
   });
+
+  const { resetPassword } = useAuthStore();
 
   const emailError =
     touched.email && !email.trim()
@@ -121,9 +124,11 @@ const ResetPassword: React.FC = () => {
       //   password,
       // });
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1000)
-      );
+      await resetPassword(Number(otp), email, password, confirmPassword); 
+
+      // await new Promise((resolve) =>
+      //   setTimeout(resolve, 1000)
+      // );
 
       toast.success('Password reset successfully');
 

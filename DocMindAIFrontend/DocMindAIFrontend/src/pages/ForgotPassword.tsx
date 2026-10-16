@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Brain,
   Mail,
@@ -11,11 +11,15 @@ import {
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
+import { useAuthStore } from '../store/authStore';
 
 const ForgotPassword: React.FC = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
+
+  const { forgotPassword } = useAuthStore();
 
   const emailError =
     touched && !email.trim()
@@ -48,9 +52,13 @@ const ForgotPassword: React.FC = () => {
       //   email: email.trim(),
       // });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await forgotPassword(email); 
+
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast.success('Password reset link sent to your email');
+
+      navigate('/resetPassword', { replace: true });
     } catch (err: unknown) {
       const errorMsg =
         (err as {

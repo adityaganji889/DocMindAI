@@ -1,5 +1,7 @@
 package com.docmindai.app.controllers;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -103,11 +105,38 @@ public class AuthController {
             description = "Resets the password for the user associated with the provided email."
         )
 	@SecurityRequirements
-    @PostMapping("/resetPassword/{email}")
-    public ResponseEntity<DefaultResponse> changePasswordHandler(@RequestBody ChangePassword changePassword,
+    @PostMapping("/resetPassword/{otp}/{email}")
+    public ResponseEntity<DefaultResponse> changePasswordHandler(@RequestBody ChangePassword changePassword, @PathVariable("otp") Integer otpValue,
                                                         @PathVariable String email) {
         
-        Optional<Boolean> cfu = userService.changePasswordHandle(email, changePassword.password(), changePassword.repeatPassword());
+		Optional<User> tu = userService.findByUsername(email);
+        User user = null;
+        try {
+        	user = tu.get();
+        }
+        catch(Exception e) {
+        	e.printStackTrace();
+        }
+        if(user!=null) {
+        	Optional<Otp> otpR = userService.findByOtpAndUser(otpValue, user);
+            Otp otp = null;
+            try {
+            	otp = otpR.get();
+            }
+            catch(Exception e) {
+            	e.printStackTrace();
+            	new ResponseEntity<>(new DefaultResponse(false, e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            
+            if (otp.getExpirationTime().before(Date.from(Instant.now()))) {
+                userService.deleteOtpById(otp.getFpid());
+                return new ResponseEntity<DefaultResponse>(new DefaultResponse(false, "OTP Has Expired"),HttpStatus.EXPECTATION_FAILED);
+            }
+            
+//            userService.updateUserStatusToActive(otp.get(),user.get());
+            userService.deleteOtpById(otp.getFpid());
+        }
+        Optional<Boolean> cfu = userService.changePasswordHandle(email, otpValue, changePassword.password(), changePassword.repeatPassword());
         Boolean flag = false;
         try {
         	flag = cfu.get();	

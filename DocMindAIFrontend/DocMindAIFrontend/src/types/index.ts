@@ -14,6 +14,18 @@ export interface UserDto {
   role: string;
 }
 
+//Forgot, Reset Password Functionalities changes starts
+export interface DefaultResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ChangePasswordRequest {
+  password: string;
+  repeatPassword: string;
+}
+ //Forgot, Reset Password Functionalities changes ends
+
 export interface LoginRequest {
   username: string;
   password: string;
