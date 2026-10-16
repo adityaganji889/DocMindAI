@@ -1,6 +1,8 @@
 package com.docmindai.app.services;
 
+import java.util.Date;
 import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,8 +14,11 @@ import com.docmindai.app.dtos.LoginRequest;
 import com.docmindai.app.dtos.LoginResponse;
 import com.docmindai.app.dtos.RegisterRequest;
 import com.docmindai.app.dtos.UserDto;
+import com.docmindai.app.dtos.MailBody;
 import com.docmindai.app.entities.User;
+import com.docmindai.app.entities.Otp;
 import com.docmindai.app.enums.Role;
+import com.docmindai.app.repositories.OtpRepository;
 import com.docmindai.app.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,11 +29,15 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	
+	private final OtpRepository otpRepository;
+	
 	private final PasswordEncoder passwordEncoder;
 	
 	private final AuthenticationManager authenticationManager;
 	
 	private final JwtService jwtService;
+	
+	private final EmailService emailService;
 	
 	public LoginResponse loginUser(LoginRequest request) {
 		String username = request.getUsername();
@@ -83,4 +92,54 @@ public class UserService {
 	    response.setEmail(savedUser.getEmail());
 	    return response;
 	}
+    
+    private Integer otpGenerator() {
+		Random random = new Random();
+		return random.nextInt(100_000, 999_999);
+	}
+    
+    
+    public Otp verifyEmailSend(String email, User user) {
+//		return CompletableFuture.supplyAsync(() -> {
+			int otp = otpGenerator();
+			MailBody mailBody = MailBody.builder().to(email)
+					.text("This is the OTP for your Forgot Password/Verify Email request : " + otp +" is valid till next 10 minutes.")
+					.subject("OTP for Forgot Password/Verify Email request").build();
+
+			Otp fp = Otp.builder().otpValue(otp).expirationTime(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
+					.user(user).build();
+            
+			//SMTP Render Mail changes starts
+			String token = emailService.sendSimpleMessage(mailBody, String.valueOf(user.getId())); //SMTP Render Mail changes
+			Otp newOtp = null;
+			if(token != null) {
+				otpRepository.deleteOtpByUser(user.getId());
+				newOtp = otpRepository.save(fp);
+			}
+			return newOtp;
+			//SMTP Render Mail changes ends
+//		});
+	}
+    
+    public Optional<Boolean> changePasswordHandle(String email, String newPassword, String repeatPassword) {
+//		return CompletableFuture.supplyAsync(() -> {
+			Boolean isPasswordMatched = false;
+			if (!newPassword.equals(repeatPassword)) {
+				return Optional.of(isPasswordMatched);
+			} else {
+				isPasswordMatched = true;
+			}
+
+			String encodedPassword = passwordEncoder.encode(newPassword);
+			userRepository.updatePassword(email, encodedPassword);
+//			userRepository.updateIsActiveStatus(email,false);
+			return Optional.of(isPasswordMatched);
+//		});
+	}
+    
+    public Optional<User> findByUsername(String email){
+    	Optional<User> user = userRepository.findByUsername(email);
+    	return user;
+    }
+
 }
