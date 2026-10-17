@@ -87,14 +87,16 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
   const { fetchDocuments } = useDocumentStore();
 
   const onDrop = useCallback((accepted: File[]) => {
+    console.log('[onDrop] Callback triggered');
+    console.log('[onDrop] Accepted files:', accepted);
     const newFiles: UploadingFile[] = accepted.map((f) => ({
       id: crypto.randomUUID(),
       file: f,
       progress: 0,
       status: 'pending',
     }));
-
     setFiles((prev) => [...prev, ...newFiles]);
+    console.log('[onDrop] Added files:', newFiles.length);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } =
@@ -111,16 +113,24 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
   };
 
   const handleUpload = async () => {
+    console.log('[UploadDialog] handleUpload called');
+    console.log('[UploadDialog] Files:', files);
     const pending = files.filter(
       (f) => f.status === 'pending'
     );
 
-    if (pending.length === 0) return;
+    console.log('[UploadDialog] Pending files:', pending.length);
+
+    if (pending.length === 0) { 
+      console.log('[UploadDialog] No pending files');  
+      return;
+    }
 
     setIsUploading(true);
 
     await Promise.all(
       pending.map(async (uf) => {
+        console.log('[UploadDialog] Calling API for:', uf.file.name);
         setFiles((prev) =>
           prev.map((f) =>
             f.id === uf.id
@@ -137,9 +147,9 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
                 prev.map((f) =>
                   f.id === uf.id
                     ? {
-                        ...f,
-                        progress: pct,
-                      }
+                      ...f,
+                      progress: pct,
+                    }
                     : f
                 )
               );
@@ -150,11 +160,11 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
             prev.map((f) =>
               f.id === uf.id
                 ? {
-                    ...f,
-                    status: 'done',
-                    progress: 100,
-                    result: res.data,
-                  }
+                  ...f,
+                  status: 'done',
+                  progress: 100,
+                  result: res.data,
+                }
                 : f
             )
           );
@@ -168,10 +178,10 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
             prev.map((f) =>
               f.id === uf.id
                 ? {
-                    ...f,
-                    status: 'error',
-                    error: msg,
-                  }
+                  ...f,
+                  status: 'error',
+                  error: msg,
+                }
                 : f
             )
           );
@@ -194,6 +204,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
   };
 
   const handleClose = () => {
+    console.trace('X: handleClose called');
     if (!isUploading) {
       setFiles([]);
       onClose();
@@ -788,13 +799,13 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
                         className={clsx(
                           'h-1 rounded-full transition-all duration-300',
                           uf.status === 'done' &&
-                            'bg-emerald-500',
+                          'bg-emerald-500',
                           uf.status === 'error' &&
-                            'bg-red-500',
+                          'bg-red-500',
                           uf.status === 'uploading' &&
-                            'bg-red-500',
+                          'bg-red-500',
                           uf.status === 'pending' &&
-                            'bg-transparent'
+                          'bg-transparent'
                         )}
                         style={{
                           width:
@@ -903,6 +914,12 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
             <button
               type="button"
               onClick={handleUpload}
+              // onClick={(e) => {
+              //   e.preventDefault();
+              //   e.stopPropagation();
+              //   console.log('[UploadDialog] Upload button clicked');
+              //   void handleUpload();
+              // }}
               disabled={
                 isUploading || pendingCount === 0
               }

@@ -4,6 +4,7 @@ import type { LoginRequest, LoginResponse, RegisterRequest, UserDto, DefaultResp
 export const authApi = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     const { data } = await api.post<LoginResponse>('/auth/login', credentials);
+    console.log('data:',data);
     return data;
   },
 

@@ -89,6 +89,7 @@ public class ChatController {
 			 Authentication authentication
 			){
 		User user  = (User) authentication.getPrincipal();
+		System.out.println("user:"+user.toString());
 		SearchResultDto chatResponse = ragService.searchSimilarChunks(request,user);
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ApiResponse.<SearchResultDto>builder()

@@ -30,18 +30,18 @@ api.interceptors.request.use(
 );
 
 // Catch 401 Unauthorized responses, log out, and redirect to /login
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      useAuthStore.getState().logout();
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+// api.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response && error.response.status === 401) {
+//       useAuthStore.getState().logout();
+//       if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+//         window.location.href = '/login';
+//       }
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 // Document APIs
 export const documentApi = {
@@ -58,6 +58,28 @@ export const documentApi = {
     });
     return data;
   },
+
+  // upload: async (
+  // file: File,
+  // onProgress?: (pct: number) => void
+  // ): Promise<ApiResponse<DocumentResponseDto>> => {
+  // const formData = new FormData();
+  // formData.append('file', file);
+
+  // const { data } = await api.post<ApiResponse<DocumentResponseDto>>(
+  //   '/documents/upload',
+  //   formData,
+  //   {
+  //     onUploadProgress: (event) => {
+  //       if (event.total && onProgress) {
+  //         onProgress(Math.round((event.loaded / event.total) * 100));
+  //       }
+  //     },
+  //   }
+  // );
+
+  //  return data;
+  // },
 
   uploadMultiple: async (files: File[], onProgress?: (pct: number) => void): Promise<ApiResponse<DocumentResponseDto[]>> => {
     const formData = new FormData();
@@ -124,13 +146,14 @@ export const chatApi = {
       body: JSON.stringify(request),
       signal,
     });
+    
 
-    if (response.status === 401) {
-      useAuthStore.getState().logout();
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-        window.location.href = '/login';
-      }
-    }
+    // if (response.status === 401) {
+    //   useAuthStore.getState().logout();
+    //   if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+    //     window.location.href = '/login';
+    //   }
+    // }
 
     return response;
   },

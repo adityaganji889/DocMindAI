@@ -32,15 +32,20 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
 
       login: async (username: string, password: string) => {
+        console.log('[AUTH 1] Login function called');
         set({ isLoading: true });
         try {
+          console.log('[AUTH 2] Sending API request');
           const response = await authApi.login({ username, password });
+          console.log('[AUTH 3] API response received:', response);
           set({
             user: response.user,
             token: response.accessToken,
             isLoading: false,
           });
+          console.log('[AUTH 4] Zustand state:', useAuthStore.getState());
         } catch (error) {
+          console.error('[AUTH ERROR]', error);
           set({ isLoading: false });
           throw error;
         }
@@ -122,6 +127,7 @@ export const useAuthStore = create<AuthState>()(
       name: 'docmind-auth',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ user: state.user, token: state.token }),
-    }
+    },
   )
 );
+

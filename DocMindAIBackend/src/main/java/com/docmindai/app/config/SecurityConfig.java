@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.docmindai.app.enums.Role;
 
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -48,15 +49,17 @@ public class SecurityConfig {
 		            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 		            .authorizeHttpRequests(
 		               auth -> auth
-		                       .requestMatchers("/api/v1/auth",
+		                       .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
+		                       .requestMatchers("/api/v1/auth/**",
 		                    		            "/v3/api-docs/**",
 		                    		            "/swagger-ui/**",
 		                    		            "/swagger-ui.html").permitAll()
 		                       .requestMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.toString())
-		                       .requestMatchers("/api/v1/**").hasAnyRole(Role.USER.toString(),Role.ADMIN.toString())
+		                       .requestMatchers("/api/v1/documents/**").hasAnyRole(Role.USER.toString(),Role.ADMIN.toString())
+		                       .requestMatchers("/api/v1/chat/**").hasAnyRole(Role.USER.toString(),Role.ADMIN.toString())
 		                       .anyRequest().authenticated()	
 		            )
-		            .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+		            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 		            .exceptionHandling(
 		              exception -> exception.authenticationEntryPoint((request,response,authException)->{
 		            	  System.out.println("Unauthorized");

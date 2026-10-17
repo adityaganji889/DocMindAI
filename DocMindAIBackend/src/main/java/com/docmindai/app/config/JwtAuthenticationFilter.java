@@ -38,6 +38,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		
 		//Logic to implement validations and other stuff
 		
+		String path = request.getServletPath();
+
+	    // Let public authentication endpoints continue.
+	    if (path.startsWith("/api/v1/auth/")) {
+	        filterChain.doFilter(request, response);
+	        return;
+	    }
+		
 		String authHeader = request.getHeader("Authorization");
 		if(authHeader==null || !authHeader.startsWith("Bearer ")) {
 		   filterChain.doFilter(request, response);
@@ -49,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String username = null;
         try {
 		   username = jwtService.extractUsername(token);
-		   if(username == null || jwtService.isTokenValid(token, userDetailService.loadUserByUsername(username))) {
+		   if(username == null || !jwtService.isTokenValid(token, userDetailService.loadUserByUsername(username))) {
 			   filterChain.doFilter(request, response);
 			   return;
 		   }
