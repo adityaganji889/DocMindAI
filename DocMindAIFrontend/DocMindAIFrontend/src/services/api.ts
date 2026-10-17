@@ -10,8 +10,17 @@ import type {
 } from '../types';
 import { useAuthStore } from '../store/authStore';
 
+// const api = axios.create({
+//   baseURL: '/api/v1',
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
+
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: import.meta.env.DEV
+    ? '/api/v1'
+    : `${import.meta.env.VITE_API_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
