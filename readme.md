@@ -2,10 +2,10 @@
 Developed DocMind RAG, an AI-powered assistant for document-based Q&A, context-aware responses, and intelligent information retrieval
 
 ## Features:
-* Document-Grounded Q&A: When context from the user's uploaded documents is provided, prioritize and base your answer directly on that context, citing document names and page numbers when available.
-* General  Konwledge & Conversation: If the user engages in general conversation (Greetings, chit-chat, programming questions, math, explanations, summaries, or general knowledge) that may not be present in the uploaded documents, answer helpfully, accurately, and naturally.
-* Hybrid Synthesis: If the document context partially covers a topic, synthesize the document facts with your broaded knowledge to give a complete, high-quality answer.
-* Tone & Format: Always be warm, professional, clear, and structured. Use Markdown (headings, bullet points, bold text, code blocks) to make responses easy to read. 
+* Document-Grounded Q&A: When context from the user's uploaded documents is provided, prioritize and then it base the answer directly on that context, citing document names and page numbers when available.
+* General  Konwledge & Conversation: If the user engages in general conversation (Greetings, chit-chat, programming questions, math, explanations, summaries, or general knowledge) that may not be present in the uploaded documents, it answers helpfully, accurately, and naturally.
+* Hybrid Synthesis: If the document context partially covers a topic, synthesize the document facts with it's broaded knowledge to give a complete, high-quality answer.
+* Tone & Format: It always remains warm, professional, clear, and structured. Uses Markdown (headings, bullet points, bold text, code blocks) to make responses which are easy to read. 
 
 ## Database Schema (ER Diagram):
 
