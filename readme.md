@@ -24,7 +24,9 @@ Developed DocMind RAG, an AI-powered assistant for document-based Q&A, context-a
 
 #### Deployed Version: 
 
-https://docmindai-icot.onrender.com
+📄 <a href="https://docmindai-icot.onrender.com">
+DocMind AI
+</a>
 
 ## Demonstration:
 
