@@ -30,7 +30,7 @@ const ThemeToggle: React.FC = () => {
       type="button"
       onClick={() => setIsDark((prev) => !prev)}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      // title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className="
         relative
         flex
